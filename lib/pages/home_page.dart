@@ -1,8 +1,10 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:pingsu/model/radio.dart';
 import 'package:pingsu/utils/ai_util.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -16,17 +18,39 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late List<MyRadio> radios;
+  late MyRadio _selectedRadio;
+  late Color _selectedColor;
+  bool _isplaying = false;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     fetchRadios();
+
+    _audioPlayer.onPlayerStateChanged.listen((event) {
+      if (event == PlayerState.playing) {
+        _isplaying = true;
+      } else {
+        _isplaying = false;
+      }
+      setState(() {});
+    });
   }
 
   fetchRadios() async {
     final radioJson = await rootBundle.loadString("assests/radio.json");
     radios = MyRadioList.fromJson(radioJson).radios;
+    _selectedRadio = radios[0];
     print(radios);
+    setState(() {});
+  }
+
+  _playMusic(String url) {
+    _audioPlayer.play(UrlSource(url));
+    _selectedRadio = radios.firstWhere((element) => element.url == url);
+    print(_selectedRadio.name);
     setState(() {});
   }
 
@@ -53,7 +77,7 @@ class _HomePageState extends State<HomePage> {
             elevation: 0.0,
             centerTitle: true,
           ).h(100.0).p16(),
-          VxSwiper.builder(
+          radios != null? VxSwiper.builder(
               itemCount: radios.length,
               enlargeCenterPage: true,
               aspectRatio: 1.0,
@@ -96,7 +120,8 @@ class _HomePageState extends State<HomePage> {
                       "Double tap to play!".text.gray300.make()
                     ].vStack(),
                   )
-                ])).clip(Clip.antiAlias)
+                ]))
+                    .clip(Clip.antiAlias)
                     .bgImage(DecorationImage(
                         image: NetworkImage(rad.image),
                         fit: BoxFit.cover,
@@ -105,18 +130,33 @@ class _HomePageState extends State<HomePage> {
                     .border(color: Colors.black, width: 5.0)
                     .withRounded(value: 60.0)
                     .make()
-                    .onInkDoubleTap(() {})
-                    .p16();
-              })
-                    .centered(),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Icon(CupertinoIcons.stop_circle,color: Colors.white,size: 50.0,),
-              ).pOnly(bottom: context.percentHeight*12)
+                    .onInkDoubleTap(() {
+                  _playMusic(rad.url);
+                }).p16();
+              }).centered():Center(child: CircularProgressIndicator(backgroundColor: Colors.white,),),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: [
+              if (_isplaying)
+                "Playing Now - ${_selectedRadio.name} FM".text.white.makeCentered(),
+              Icon(
+                _isplaying
+                    ? CupertinoIcons.stop_circle
+                    : CupertinoIcons.play_circle,
+                color: Colors.white,
+                size: 50.0,
+              ).onInkTap(() {
+                if (_isplaying) {
+                  _audioPlayer.stop();
+                } else {
+                  _playMusic(_selectedRadio.url);
+                }
+              }),
+            ].vStack(),
+          ).pOnly(bottom: context.percentHeight * 12)
         ],
         fit: StackFit.expand,
         clipBehavior: Clip.antiAlias,
-
       ),
     );
   }
