@@ -12,13 +12,13 @@ class MyRadioList {
     required List<MyRadio> radios,
   }) {
     return MyRadioList(
-      radios: radios ?? this.radios,
+      radios: radios,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'radios': radios?.map((x) => x?.toMap())?.toList(),
+      'radios': radios.map((x) => x.toMap()).toList(),
     };
   }
 
@@ -88,17 +88,17 @@ class MyRadio {
     required String lang,
   }) {
     return MyRadio(
-      id: id ?? this.id,
-      order: order ?? this.order,
-      name: name ?? this.name,
-      tagline: tagline ?? this.tagline,
-      color: color ?? this.color,
-      desc: desc ?? this.desc,
-      url: url ?? this.url,
-      category: category ?? this.category,
-      icon: icon ?? this.icon,
-      image: image ?? this.image,
-      lang: lang ?? this.lang,
+      id: id,
+      order: order,
+      name: name,
+      tagline: tagline,
+      color: color,
+      desc: desc,
+      url: url,
+      category: category,
+      icon: icon,
+      image: image,
+      lang: lang,
     );
   }
 

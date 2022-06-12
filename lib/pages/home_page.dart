@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
     fetchRadios();
 
     _audioPlayer.onPlayerStateChanged.listen((event) {
-      if (event == PlayerState.playing) {
+      if (event == AudioPlayerState.PLAYING) {
         _isplaying = true;
       } else {
         _isplaying = false;
@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _playMusic(String url) {
-    _audioPlayer.play(UrlSource(url));
+    _audioPlayer.play(url);
     _selectedRadio = radios.firstWhere((element) => element.url == url);
     print(_selectedRadio.name);
     setState(() {});
@@ -77,68 +77,78 @@ class _HomePageState extends State<HomePage> {
             elevation: 0.0,
             centerTitle: true,
           ).h(100.0).p16(),
-          radios != null? VxSwiper.builder(
-              itemCount: radios.length,
-              enlargeCenterPage: true,
-              aspectRatio: 1.0,
-              itemBuilder: (context, index) {
-                final rad = radios[index];
+          radios != null
+              ? VxSwiper.builder(
+                  itemCount: radios.length,
+                  enlargeCenterPage: true,
+                  aspectRatio: 1.0,
+                  itemBuilder: (context, index) {
+                    final rad = radios[index];
 
-                return VxBox(
-                        child: ZStack([
-                  Positioned(
-                      top: 0.0,
-                      right: 0.0,
-                      child: VxBox(
-                              child: rad.category.text.uppercase.white
-                                  .make()
-                                  .p16())
-                          .height(50)
-                          .black
-                          .alignCenter
-                          .withRounded(value: 10.0)
-                          .make()),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: VStack(
-                      [
-                        rad.name.text.xl3.white.bold.make(),
-                        5.heightBox,
-                        rad.tagline.text.sm.white.semiBold.make()
-                      ],
-                      crossAlignment: CrossAxisAlignment.center,
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: [
-                      Icon(
-                        CupertinoIcons.play_circle,
-                        color: Colors.white,
+                    return VxBox(
+                            child: ZStack([
+                      Positioned(
+                          top: 0.0,
+                          right: 0.0,
+                          child: VxBox(
+                                  child: rad.category.text.uppercase.white
+                                      .make()
+                                      .p16())
+                              .height(50)
+                              .black
+                              .alignCenter
+                              .withRounded(value: 10.0)
+                              .make()),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: VStack(
+                          [
+                            rad.name.text.xl3.white.bold.make(),
+                            5.heightBox,
+                            rad.tagline.text.sm.white.semiBold.make()
+                          ],
+                          crossAlignment: CrossAxisAlignment.center,
+                        ),
                       ),
-                      10.heightBox,
-                      "Double tap to play!".text.gray300.make()
-                    ].vStack(),
-                  )
-                ]))
-                    .clip(Clip.antiAlias)
-                    .bgImage(DecorationImage(
-                        image: NetworkImage(rad.image),
-                        fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(
-                            Colors.black.withOpacity(0.3), BlendMode.darken)))
-                    .border(color: Colors.black, width: 5.0)
-                    .withRounded(value: 60.0)
-                    .make()
-                    .onInkDoubleTap(() {
-                  _playMusic(rad.url);
-                }).p16();
-              }).centered():Center(child: CircularProgressIndicator(backgroundColor: Colors.white,),),
+                      Align(
+                        alignment: Alignment.center,
+                        child: [
+                          Icon(
+                            CupertinoIcons.play_circle,
+                            color: Colors.white,
+                          ),
+                          10.heightBox,
+                          "Double tap to play!".text.gray300.make()
+                        ].vStack(),
+                      )
+                    ]))
+                        .clip(Clip.antiAlias)
+                        .bgImage(DecorationImage(
+                            image: NetworkImage(rad.image),
+                            fit: BoxFit.cover,
+                            colorFilter: ColorFilter.mode(
+                                Colors.black.withOpacity(0.3),
+                                BlendMode.darken)))
+                        .border(color: Colors.black, width: 5.0)
+                        .withRounded(value: 60.0)
+                        .make()
+                        .onInkDoubleTap(() {
+                      _playMusic(rad.url);
+                    }).p16();
+                  }).centered()
+              : Center(
+                  child: CircularProgressIndicator(
+                    backgroundColor: Colors.white,
+                  ),
+                ),
           Align(
             alignment: Alignment.bottomCenter,
             child: [
               if (_isplaying)
-                "Playing Now - ${_selectedRadio.name} FM".text.white.makeCentered(),
+                "Playing Now - ${_selectedRadio.name} FM"
+                    .text
+                    .white
+                    .makeCentered(),
               Icon(
                 _isplaying
                     ? CupertinoIcons.stop_circle
