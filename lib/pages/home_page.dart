@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:alan_voice/alan_voice.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    setupAlan();
     fetchRadios();
 
     _audioPlayer.onPlayerStateChanged.listen((event) {
@@ -37,6 +39,23 @@ class _HomePageState extends State<HomePage> {
       }
       setState(() {});
     });
+  }
+
+  setupAlan() {
+    AlanVoice.addButton(
+        "9f8fc7e52303045e3b436a2672f2069b2e956eca572e1d8b807a3e2338fdd0dc/stage",
+        buttonAlign: AlanVoice.BUTTON_ALIGN_LEFT);
+    AlanVoice.callbacks.add((command) => _handleCommand(command.data));
+  }
+
+  _handleCommand(Map<String, dynamic> response) {
+    switch (response["command"]) {
+      case "play":
+        _playMusic(_selectedRadio.url);
+        break;
+      default:
+        print("command was ${response["command"]}");
+    }
   }
 
   fetchRadios() async {
@@ -63,7 +82,7 @@ class _HomePageState extends State<HomePage> {
           VxAnimatedBox()
               .size(context.screenWidth, context.screenHeight)
               .withGradient(LinearGradient(
-                colors: [AIColors.primaryColor1, AIColors.primaryColor2],
+                colors: [AIColors.primaryColor2, AIColors.primaryColor1],
                 begin: Alignment.topLeft,
                 end: Alignment.topRight,
               ))
@@ -81,7 +100,16 @@ class _HomePageState extends State<HomePage> {
               ? VxSwiper.builder(
                   itemCount: radios.length,
                   enlargeCenterPage: true,
-                  aspectRatio: 1.0,
+                  onPageChanged: (index) {
+                    _selectedRadio = radios[index];
+                    final colorHex = radios[index].color;
+                    _selectedColor = Color(int.tryParse(colorHex));
+                  },
+                  aspectRatio: context.mdWindowSize == MobileWindowSize.xsmall
+                      ? 1.0
+                      : context.mdWindowSize == MobileWindowSize.medium
+                          ? 2.0
+                          : 3.0,
                   itemBuilder: (context, index) {
                     final rad = radios[index];
 
